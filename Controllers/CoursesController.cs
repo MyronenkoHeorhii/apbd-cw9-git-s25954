@@ -21,7 +21,7 @@ public class CoursesController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<CourseDto>>> CoursesWithAssignmentCounts([FromQuery] bool activeOnly = false)
     {
-        Console.WriteLine("im here");
+        //Console.WriteLine("im here");
         
         var query = _context.Courses
             .AsNoTracking()
@@ -44,5 +44,44 @@ public class CoursesController : ControllerBase
 
         return Ok(result);
     }
-    
+
+
+    [HttpGet("{idCourse}/assignments")]
+    public async Task<ActionResult<IEnumerable<AssignmentDto>>> AssignmentsForOneCourse(int idCourse,
+        [FromQuery] bool publishedOnly = false)
+    {
+        
+        var courseExists = await _context.Courses
+            .AnyAsync(c => c.CourseId == idCourse);
+
+        if (!courseExists)
+        {
+            return NotFound();
+        }
+
+        var query = _context.Assignments
+            .AsNoTracking()
+            .Where(a => a.CourseId == idCourse);
+
+        if (publishedOnly)
+        {
+            query = query.Where(a => a.IsPublished);
+        }
+
+        var assignments = await query
+            .Select(a => new AssignmentDto()
+            {
+                AssignmentId = a.AssignmentId,
+                Title = a.Title,
+                DueDate = a.DueDate,
+                MaxPoints = a.MaxPoints,
+                IsPublished = a.IsPublished,
+                SubmissionCount = a.Submissions.Count()
+            })
+            .ToListAsync();
+        
+        Console.WriteLine(assignments);
+        
+        return Ok(assignments);
+    }
 }
