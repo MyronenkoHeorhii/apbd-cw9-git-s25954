@@ -1,0 +1,11 @@
+﻿namespace UniversityTasksDbFirstApi.DTO;
+
+public class AssignmentDto
+{
+    public int AssignmentId { get; set; }
+    public string Title { get; set; }
+    public DateTime DueDate {get; set;}
+    public int MaxPoints { get; set; }
+    public bool IsPublished{get; set;}
+    public int SubmissionCount{get; set;}
+}
